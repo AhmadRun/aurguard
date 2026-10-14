@@ -9,15 +9,9 @@ license=('MIT')
 depends=('python' 'pacman')
 optdepends=('libnotify: desktop notifications'
             'omarchy: AUR Guard bar widget')
-makedepends=('python-build' 'python-installer' 'python-setuptools' 'python-wheel')
 install=aurguard.install
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('SKIP')
-
-build() {
-  cd "$pkgname-$pkgver"
-  python -m build --wheel --no-isolation
-}
+sha256sums=('4dc681ee97ce9b7e7aa41e93afaea60ef43090e36d9710f450c7848d9dd5f501')
 
 check() {
   cd "$pkgname-$pkgver"
@@ -26,7 +20,17 @@ check() {
 
 package() {
   cd "$pkgname-$pkgver"
-  python -m installer --destdir="$pkgdir" dist/*.whl
+  local site
+  site=$(python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
+  install -dm755 "$pkgdir$site"
+  cp -r aurguard "$pkgdir$site/"
+  python -m compileall -q -d "$site" "$pkgdir$site/aurguard"
+  install -Dm755 /dev/stdin "$pkgdir/usr/bin/aurguard" <<'LAUNCHER'
+#!/usr/bin/python3
+import sys
+from aurguard.cli import main
+sys.exit(main())
+LAUNCHER
   install -Dm644 systemd/aurguard-* -t "$pkgdir/usr/lib/systemd/user/"
   install -dm755 "$pkgdir/usr/share/aurguard"
   cp -r omarchy-plugin "$pkgdir/usr/share/aurguard/"

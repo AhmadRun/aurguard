@@ -1,0 +1,16 @@
+pkgbase = aurguard
+	pkgdesc = Self-updating malware scanner for AUR packages (yay/paru), with an Omarchy bar widget
+	pkgver = 0.1.0
+	pkgrel = 1
+	url = https://github.com/AhmadRun/aurguard
+	install = aurguard.install
+	arch = any
+	license = MIT
+	depends = python
+	depends = pacman
+	optdepends = libnotify: desktop notifications
+	optdepends = omarchy: AUR Guard bar widget
+	source = aurguard-0.1.0.tar.gz::https://github.com/AhmadRun/aurguard/archive/refs/tags/v0.1.0.tar.gz
+	sha256sums = 4dc681ee97ce9b7e7aa41e93afaea60ef43090e36d9710f450c7848d9dd5f501
+
+pkgname = aurguard

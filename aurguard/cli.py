@@ -8,7 +8,7 @@ import time
 from dataclasses import asdict
 from pathlib import Path
 
-from . import __version__, db, inventory, notify, report, scanner, upstream
+from . import __version__, archlists, db, inventory, notify, report, scanner, upstream
 from .paths import STATE_DIR, load_config
 
 HISTORY = STATE_DIR / "history.jsonl"
@@ -24,6 +24,14 @@ def cmd_update(args, cfg) -> int:
         ok = True
     except Exception as e:
         print(f"community lists: update failed ({e}); keeping previous copy", file=sys.stderr)
+
+    new, errs = archlists.update()
+    for e in errs:
+        print(f"arch mailing lists: {e}", file=sys.stderr)
+    if len(errs) < len(archlists.LISTS):
+        total = len(archlists.load()["reports"])
+        print(f"arch mailing lists: {new} new malware report{'s' if new != 1 else ''} ({total} kept)")
+        ok = True
 
     if "CHANGE-ME" in cfg["feed_url"]:
         print("aurguard feed: not published yet (rules + extra threats use the built-in copy)")
@@ -50,7 +58,7 @@ def cmd_scan(args, cfg) -> int:
     log = (lambda m: print(m, file=sys.stderr)) if not args.json and not args.quiet else (lambda m: None)
     findings, warnings = scanner.scan(pkgs, threats, ruleset, online=not args.offline,
                                       timeout=cfg["timeout"], log=log, upstream=upstream.load(),
-                                      installed_at=inventory.install_dates())
+                                      installed_at=inventory.install_dates(), archlists=archlists.load())
     dbv = db.local_manifest().get("version")
     (report.print_json if args.json else report.print_text)(findings, len(pkgs), dbv, warnings)
 
@@ -99,6 +107,8 @@ def cmd_status(args, cfg) -> int:
                           "db_updated": m.get("updated"), "known": len(db.load_threats().get("packages", [])),
                           "rules": len(db.load_rules().get("rules", [])), "last_scan": _last_scan(),
                           "community": _community(),
+                          "arch_lists": {"reports": len(archlists.load()["reports"]),
+                                         "checked": archlists.load()["checked"]},
                           "timers": _timers()}))
         return 0
     print(f"aurguard {__version__}\nfeed: {cfg['feed_url']}\nthreat DB: v{m.get('version')} "
@@ -106,6 +116,8 @@ def cmd_status(args, cfg) -> int:
           f"{len(db.load_rules().get('rules', []))} rules")
     c = _community()
     print(f"community lists: {c['packages']} known-bad packages, {c['campaigns']} campaigns, fetched {c['fetched']}")
+    a = archlists.load()
+    print(f"arch mailing lists: {len(a['reports'])} malware reports kept, last checked {a['checked']}")
     last = _last_scan()
     if last:
         n = len(last["findings"])

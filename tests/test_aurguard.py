@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from aurguard import db, rules, scanner, upstream
+from aurguard import archlists, db, rules, scanner, upstream
 from aurguard.inventory import Package, parse
 
 FIX = Path(__file__).parent / "fixtures"
@@ -66,6 +66,44 @@ class CampaignTests(unittest.TestCase):
                  "I/l.txt": "evil-bin\n"}
         d = upstream.fetch(get=lambda url, t: files[url], base="I/")
         self.assertEqual(d["campaigns"][0]["packages"], ["evil-bin"])
+
+
+FEED_XML = """<?xml version="1.0"?><rss><channel>
+<item><title>[PRQ#90001] Deletion Request for evil-bin</title>
+<description>someone [1] filed a deletion request for evil-bin [2]:
+
+This package downloads a malicious binary that steals browser data.
+[2] https://aur.archlinux.org/pkgbase/evil-bin/</description>
+<link>https://lists.archlinux.org/x/1</link><pubDate>Wed, 14 Oct 2026 23:05:35 +0000</pubDate></item>
+<item><title>[PRQ#90002] Deletion Request for opendeck-bin</title>
+<description>Obsolete, now in [Extra].</description>
+<link>https://lists.archlinux.org/x/2</link><pubDate>Wed, 14 Oct 2026 23:05:35 +0000</pubDate></item>
+<item><title>Malware found in AUR</title>
+<description>Please check https://aur.archlinux.org/packages/bad-git and remove it, it contains a trojan.</description>
+<link>https://lists.archlinux.org/x/3</link><pubDate>Wed, 14 Oct 2026 20:00:00 +0000</pubDate></item>
+</channel></rss>"""
+
+
+class ArchListTests(unittest.TestCase):
+    def test_parse_requests(self):
+        r = archlists.parse_feed(FEED_XML, "aur-requests")
+        self.assertEqual([x["package"] for x in r], ["evil-bin"])  # benign deletion ignored
+
+    def test_parse_general_urls(self):
+        r = archlists.parse_feed(FEED_XML, "aur-general")
+        self.assertIn("bad-git", [x["package"] for x in r])
+
+    def test_update_accumulates_and_scan_flags(self):
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            new, errs = archlists.update(data_dir=d, get=lambda url, t: FEED_XML)
+            self.assertEqual(errs, [])
+            again, _ = archlists.update(data_dir=d, get=lambda url, t: "<rss><channel></channel></rss>")
+            self.assertEqual(again, 0)
+            state = archlists.load(d)
+            self.assertTrue(any(r["package"] == "evil-bin" for r in state["reports"]))  # kept after feed rolled over
+            f = scanner.check_archlists([Package("evil-bin", "1")], state, set())
+            self.assertEqual(f[0].severity, "high")
 
 
 class InventoryTests(unittest.TestCase):

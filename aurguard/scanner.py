@@ -84,6 +84,21 @@ def check_campaigns(pkgs: list[Package], upstream: dict, installed_at: dict[str,
     return out
 
 
+def check_archlists(pkgs: list[Package], state: dict, skip: set[str]) -> list[Finding]:
+    """Packages reported as malware on the official Arch mailing lists (aur-requests / aur-general)."""
+    by_pkg: dict[str, list[dict]] = {}
+    for r in state.get("reports", []):
+        by_pkg.setdefault(r["package"], []).append(r)
+    out = []
+    for p in pkgs:
+        if p.name in skip or p.name not in by_pkg:
+            continue
+        reps = by_pkg[p.name]
+        out.append(Finding(p.name, p.version, "high", "Reported as malicious on the official Arch mailing list",
+                           [f"{r['date']} {r['list']}: {r['title']} — {r['link']}" for r in reps[-3:]]))
+    return out
+
+
 def check_iocs(upstream: dict) -> list[Finding]:
     """Look for known malware files on disk (e.g. the fake ~/.local/bin/sudo password grabber)."""
     import os
@@ -158,12 +173,14 @@ def check_pkgbuilds(pkgs: list[Package], meta: dict[str, dict], ruleset: dict, t
 
 def scan(pkgs: list[Package], threats: dict, ruleset: dict, online: bool = True, timeout: int = 15,
          log=lambda msg: None, upstream: dict | None = None,
-         installed_at: dict[str, int] | None = None) -> tuple[list[Finding], list[str]]:
+         installed_at: dict[str, int] | None = None,
+         archlists: dict | None = None) -> tuple[list[Finding], list[str]]:
     """Returns (findings, warnings)."""
     warnings = []
     upstream = upstream or {}
     findings = check_blocklist(pkgs, threats)
     findings += check_campaigns(pkgs, upstream, installed_at or {}, {f.package for f in findings})
+    findings += check_archlists(pkgs, archlists or {}, {f.package for f in findings})
     findings += check_iocs(upstream)
     blocked = {f.package for f in findings}
     bad_accounts = set(threats.get("maintainers", []))

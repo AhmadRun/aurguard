@@ -6,6 +6,7 @@ Unlike one-time check scripts, aurguard **keeps itself current**:
 
 | Layer | How it stays up to date |
 |---|---|
+| Official Arch mailing lists (live) | Every update reads the RSS feeds of `aur-requests` (all AUR deletion requests) and `aur-general` (malware reports). Any post mentioning malware or a trojan, stealer, backdoor and so on is kept in `~/.local/share/aurguard/arch-lists.json`, and an installed package named in it is flagged **high**. |
 | Community lists (no setup needed) | Every `aurguard update` pulls the live lists from [lenucksi/aur-malware-check](https://github.com/lenucksi/aur-malware-check) and the official Arch HedgeDoc: about 2,000 packages from the June 2026 attack, CHAOS RAT and Russian spam, plus attacker accounts and malware-file hashes. |
 | Known-malware blocklist | `feed/threats.json`. Every user downloads it automatically every 6h, sha256-verified. |
 | Behaviour rules (catch *unknown* malware) | `feed/rules.json`, delivered through the same auto-update. |

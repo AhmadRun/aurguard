@@ -1,0 +1,17 @@
+name: Feed integrity + tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m unittest discover -s tests -v
+      - name: Manifest must match feed files
+        run: |
+          python tools/build_manifest.py
+          git diff --exit-code feed/manifest.json aurguard/data || (echo "Run tools/build_manifest.py and commit"; exit 1)

@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aurguard"
+version = "0.1.0"
+description = "Self-updating malware scanner for AUR packages on Arch Linux"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+
+[project.scripts]
+aurguard = "aurguard.cli:main"
+
+[tool.setuptools]
+packages = ["aurguard"]
+
+[tool.setuptools.package-data]
+aurguard = ["data/*.json"]

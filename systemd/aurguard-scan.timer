@@ -1,0 +1,11 @@
+[Unit]
+Description=aurguard: daily AUR malware scan
+
+[Timer]
+OnBootSec=10min
+OnCalendar=daily
+RandomizedDelaySec=30min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

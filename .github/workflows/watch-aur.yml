@@ -1,0 +1,32 @@
+name: Watch AUR for new malware
+
+on:
+  schedule:
+    - cron: "17 3 * * *"     # daily
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Scan packages changed in the last 24h
+        run: python tools/watch_aur.py --hours 26
+      - name: Open PR with candidates for human review
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: watcher/candidates
+          commit-message: "watcher: new suspicious AUR packages"
+          title: "Suspicious AUR packages for review"
+          body: |
+            The daily watcher flagged packages in `feed/candidates.json`.
+            Review each one. Move confirmed malware into `feed/threats.json`,
+            then run `python tools/build_manifest.py` so every client picks it up.
+          add-paths: feed/candidates.json

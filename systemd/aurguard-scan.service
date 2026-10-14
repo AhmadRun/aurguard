@@ -1,0 +1,10 @@
+[Unit]
+Description=aurguard: scan installed AUR packages for malware
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/aurguard scan --update --notify --quiet
+SuccessExitStatus=1 3
+Nice=10

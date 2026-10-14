@@ -14,13 +14,21 @@ Unlike one-time check scripts, aurguard **keeps itself current**:
 | Scheduled scans | systemd user timers: DB update every 6h, full scan daily, desktop notification on danger. |
 
 ## Install
+On Arch Linux, Omarchy included. No sudo needed:
+
 ```sh
-git clone https://github.com/CHANGE-ME/aurguard && cd aurguard
-pip install --user .        # or: makepkg -si  (PKGBUILD included)
-aurguard update
-aurguard scan
-aurguard enable             # turn on automatic updates + daily scans
+git clone https://github.com/AhmadRun/aurguard
+cd aurguard && ./install.sh
 ```
+
+That's all. The installer:
+- installs the `aurguard` command into `~/.local/bin`
+- turns on automatic protection: threat lists update every 6 hours and a full scan runs daily, with a desktop notification if something is found
+- on **Omarchy**, adds the **AUR Guard** shield to your bar
+- downloads the latest threat lists and runs a first scan
+
+To update later: `cd aurguard && git pull && ./install.sh`
+To uninstall: `~/.local/share/aurguard/app/uninstall.sh`
 
 ## Commands
 - `aurguard scan [pkg...] [--json] [--notify] [--offline] [--update]`: exit code 0 = clean, 1 = high, 3 = critical

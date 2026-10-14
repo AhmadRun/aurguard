@@ -10,7 +10,7 @@ CACHE_DIR = Path(os.environ.get("XDG_CACHE_HOME", HOME / ".cache")) / "aurguard"
 CONFIG_FILE = Path(os.environ.get("XDG_CONFIG_HOME", HOME / ".config")) / "aurguard/config.toml"
 BUNDLED = Path(__file__).parent / "data"
 
-DEFAULT_FEED = "https://raw.githubusercontent.com/CHANGE-ME/aurguard/main/feed"
+DEFAULT_FEED = "https://raw.githubusercontent.com/AhmadRun/aurguard/main/feed"
 
 
 def load_config() -> dict:

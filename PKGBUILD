@@ -1,10 +1,10 @@
-# Maintainer: CHANGE-ME
+# Maintainer: AhmadRun
 pkgname=aurguard
 pkgver=0.1.0
 pkgrel=1
 pkgdesc="Self-updating malware scanner for AUR packages"
 arch=('any')
-url="https://github.com/CHANGE-ME/aurguard"
+url="https://github.com/AhmadRun/aurguard"
 license=('MIT')
 depends=('python' 'pacman')
 optdepends=('libnotify: desktop notifications')

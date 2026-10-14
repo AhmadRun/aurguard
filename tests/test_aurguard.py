@@ -106,6 +106,19 @@ class ArchListTests(unittest.TestCase):
             self.assertEqual(f[0].severity, "high")
 
 
+class CloudHistoryTests(unittest.TestCase):
+    def test_merges_reports_collected_while_offline(self):
+        cloud = json.dumps({"reports": [{"package": "missed-bin", "list": "aur-requests",
+                                         "title": "t", "link": "L", "date": "2026-10-01"}]})
+        empty = "<rss><channel></channel></rss>"
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            new, errs = archlists.update(data_dir=d, cloud_url="C",
+                                         get=lambda url, t: cloud if url == "C" else empty)
+            self.assertEqual((new, errs), (1, []))
+            self.assertEqual(archlists.load(d)["reports"][0]["package"], "missed-bin")
+
+
 class InventoryTests(unittest.TestCase):
     def test_parse(self):
         self.assertEqual(parse("yay 12.4-1\nfoo-bin 2:1.0-3\n\n"),

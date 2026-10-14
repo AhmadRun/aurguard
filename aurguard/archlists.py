@@ -67,12 +67,25 @@ def load(data_dir: Path = DATA_DIR) -> dict:
         return {"reports": [], "checked": None}
 
 
-def update(timeout: int = 40, data_dir: Path = DATA_DIR, get=_get) -> tuple[int, list[str]]:
-    """Fetch feeds, merge new reports. Returns (new_report_count, errors)."""
+def update(timeout: int = 40, data_dir: Path = DATA_DIR, get=_get,
+           cloud_url: str | None = None) -> tuple[int, list[str]]:
+    """Fetch feeds, merge new reports. Returns (new_report_count, errors).
+
+    cloud_url: the aurguard feed's arch-lists.json, collected every 6 h by a GitHub Action,
+    so reports posted while this machine was off are not missed."""
     import datetime
     state = load(data_dir)
     seen = {(r["package"], r["link"]) for r in state["reports"]}
     new, errors = 0, []
+    if cloud_url:
+        try:
+            for r in json.loads(get(cloud_url, timeout)).get("reports", []):
+                if (r["package"], r["link"]) not in seen:
+                    state["reports"].append(r)
+                    seen.add((r["package"], r["link"]))
+                    new += 1
+        except Exception as e:
+            errors.append(f"cloud history: {e}")
     for name in LISTS:
         try:
             for r in parse_feed(get(FEED.format(name=name), timeout), name):
@@ -82,7 +95,7 @@ def update(timeout: int = 40, data_dir: Path = DATA_DIR, get=_get) -> tuple[int,
                     new += 1
         except Exception as e:
             errors.append(f"{name}: {e}")
-    if len(errors) < len(LISTS):
+    if sum(not e.startswith("cloud") for e in errors) < len(LISTS):
         state["checked"] = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     data_dir.mkdir(parents=True, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=data_dir)

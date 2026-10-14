@@ -25,10 +25,11 @@ def cmd_update(args, cfg) -> int:
     except Exception as e:
         print(f"community lists: update failed ({e}); keeping previous copy", file=sys.stderr)
 
-    new, errs = archlists.update()
+    cloud = None if "CHANGE-ME" in cfg["feed_url"] else f"{cfg['feed_url']}/arch-lists.json"
+    new, errs = archlists.update(cloud_url=cloud)
     for e in errs:
         print(f"arch mailing lists: {e}", file=sys.stderr)
-    if len(errs) < len(archlists.LISTS):
+    if sum(not e.startswith("cloud") for e in errs) < len(archlists.LISTS):
         total = len(archlists.load()["reports"])
         print(f"arch mailing lists: {new} new malware report{'s' if new != 1 else ''} ({total} kept)")
         ok = True

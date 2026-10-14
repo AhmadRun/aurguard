@@ -27,7 +27,8 @@ jobs:
           git config user.name "aurguard-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add feed/arch-lists.json
-          if git diff --cached --quiet; then echo "no changes"; exit 0; fi
+          # only commit when a new report arrived (not just the "checked" timestamp)
+          if ! git diff --cached -U0 | grep -q '^+.*"package"'; then echo "no new reports"; exit 0; fi
           git commit -m "feed: Arch mailing-list malware reports"
           git pull --rebase
           git push

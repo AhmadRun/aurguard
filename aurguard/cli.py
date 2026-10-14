@@ -41,10 +41,11 @@ def cmd_scan(args, cfg) -> int:
     dbv = db.local_manifest().get("version")
     (report.print_json if args.json else report.print_text)(findings, len(pkgs), dbv, warnings)
 
-    STATE_DIR.mkdir(parents=True, exist_ok=True)
-    with open(HISTORY, "a") as f:
-        f.write(json.dumps({"time": time.time(), "scanned": len(pkgs), "db_version": dbv,
-                            "findings": [asdict(x) for x in findings]}) + "\n")
+    if not args.package:  # only full-system scans describe this machine's state
+        STATE_DIR.mkdir(parents=True, exist_ok=True)
+        with open(HISTORY, "a") as f:
+            f.write(json.dumps({"time": time.time(), "scanned": len(pkgs), "db_version": dbv,
+                                "findings": [asdict(x) for x in findings]}) + "\n")
 
     serious = [f for f in findings if f.severity in ("critical", "high")]
     if args.notify and serious:
@@ -57,22 +58,42 @@ def cmd_scan(args, cfg) -> int:
     return 1 if serious else 0
 
 
+def _timers() -> dict:
+    if not shutil.which("systemctl"):
+        return {}
+    out = subprocess.run(["systemctl", "--user", "is-active", "aurguard-scan.timer", "aurguard-update.timer"],
+                         capture_output=True, text=True).stdout.split()
+    return {"scan": out[0] if out else "unknown", "update": out[1] if len(out) > 1 else "unknown"}
+
+
+def _last_scan() -> dict | None:
+    if not HISTORY.exists():
+        return None
+    lines = HISTORY.read_text().strip().splitlines()
+    return json.loads(lines[-1]) if lines else None
+
+
 def cmd_status(args, cfg) -> int:
     m = db.local_manifest()
+    if args.json:
+        print(json.dumps({"version": __version__, "feed": cfg["feed_url"], "db_version": m.get("version"),
+                          "db_updated": m.get("updated"), "known": len(db.load_threats().get("packages", [])),
+                          "rules": len(db.load_rules().get("rules", [])), "last_scan": _last_scan(),
+                          "timers": _timers()}))
+        return 0
     print(f"aurguard {__version__}\nfeed: {cfg['feed_url']}\nthreat DB: v{m.get('version')} "
           f"updated {m.get('updated', '?')}, {len(db.load_threats().get('packages', []))} known-bad packages, "
           f"{len(db.load_rules().get('rules', []))} rules")
-    if HISTORY.exists():
-        last = json.loads(HISTORY.read_text().strip().splitlines()[-1])
+    last = _last_scan()
+    if last:
         n = len(last["findings"])
         print(f"last scan: {time.strftime('%Y-%m-%d %H:%M', time.localtime(last['time']))}, "
               f"{last['scanned']} packages, {n} finding{'s' if n != 1 else ''}")
     else:
         print("last scan: never")
-    if shutil.which("systemctl"):
-        out = subprocess.run(["systemctl", "--user", "is-active", "aurguard-scan.timer", "aurguard-update.timer"],
-                             capture_output=True, text=True).stdout.split()
-        print(f"timers: scan={out[0] if out else '?'} update={out[1] if len(out) > 1 else '?'}")
+    t = _timers()
+    if t:
+        print(f"timers: scan={t['scan']} update={t['update']}")
     return 0
 
 
@@ -116,7 +137,8 @@ def main(argv=None) -> int:
     s.add_argument("--all", action="store_true", help="include official repo packages in blocklist check")
     s.add_argument("-q", "--quiet", action="store_true")
     sub.add_parser("update", help="download latest threat DB")
-    sub.add_parser("status", help="show DB version, last scan, timers")
+    st = sub.add_parser("status", help="show DB version, last scan, timers")
+    st.add_argument("--json", action="store_true")
     sub.add_parser("enable", help="enable automatic update+scan timers")
     sub.add_parser("disable", help="disable timers")
     args = ap.parse_args(argv)

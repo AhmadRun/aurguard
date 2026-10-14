@@ -41,3 +41,12 @@ timeout = 15
 - Known malicious package names, versions and maintainer accounts
 - PKGBUILD and `.install` heuristics: pipe-to-shell, base64 exec, reverse shells, paste-site, Discord CDN and raw-IP downloads, shell-rc or autostart persistence, SSH key or browser credential access, and more
 - AUR metadata: package deleted from the AUR, orphaned, or brand new with no votes
+
+## Omarchy bar widget
+`omarchy-plugin/` holds an Omarchy shell widget that matches your theme. It shows a shield that turns red with a count when a dangerous package is found. Click it for a popup with status, findings, **Scan now**, **Update DB** and an **Automatic protection** toggle. Middle-click starts a scan.
+
+```sh
+omarchy-plugin/install.sh
+```
+
+The CLI output also uses your current Omarchy theme colours.

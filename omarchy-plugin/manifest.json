@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.ahmadrun.aurguard",
+  "name": "AUR Guard",
+  "version": "0.1.0",
+  "author": "Ahmad Elyan",
+  "license": "MIT",
+  "description": "AUR malware protection in the Omarchy bar: self-updating threat database, scheduled scans and one-click scan.",
+  "kinds": ["bar-widget"],
+  "entryPoints": {
+    "barWidget": "AurGuardWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "AUR Guard",
+    "description": "Shield that turns red when an installed AUR package is malicious.",
+    "category": "System",
+    "aliases": ["aur", "malware", "security", "scanner", "yay", "virus"],
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": { "aurguardPath": "aurguard", "refreshMinutes": 10 },
+    "schema": [
+      { "key": "aurguardPath", "type": "string", "label": "aurguard command", "defaultValue": "aurguard",
+        "description": "Path to the aurguard executable." },
+      { "key": "refreshMinutes", "type": "integer", "label": "Refresh status (minutes)",
+        "min": 1, "max": 120, "step": 1, "defaultValue": 10 }
+    ]
+  }
+}

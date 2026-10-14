@@ -1,0 +1,36 @@
+# Maintainer: AhmadRun <https://github.com/AhmadRun>
+pkgname=aurguard
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Self-updating malware scanner for AUR packages (yay/paru), with an Omarchy bar widget"
+arch=('any')
+url="https://github.com/AhmadRun/aurguard"
+license=('MIT')
+depends=('python' 'pacman')
+optdepends=('libnotify: desktop notifications'
+            'omarchy: AUR Guard bar widget')
+makedepends=('python-build' 'python-installer' 'python-setuptools' 'python-wheel')
+install=aurguard.install
+source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "$pkgname-$pkgver"
+  python -m build --wheel --no-isolation
+}
+
+check() {
+  cd "$pkgname-$pkgver"
+  python -m unittest discover -s tests
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+  python -m installer --destdir="$pkgdir" dist/*.whl
+  install -Dm644 systemd/aurguard-* -t "$pkgdir/usr/lib/systemd/user/"
+  install -dm755 "$pkgdir/usr/share/aurguard"
+  cp -r omarchy-plugin "$pkgdir/usr/share/aurguard/"
+  rm -f "$pkgdir/usr/share/aurguard/omarchy-plugin/install.sh"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+}

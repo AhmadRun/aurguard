@@ -154,6 +154,25 @@ def cmd_enable(args, cfg) -> int:
     return r.returncode
 
 
+def cmd_widget(args, cfg) -> int:
+    """Install the Omarchy bar widget (packaged copy or the one next to the source)."""
+    if not shutil.which("omarchy"):
+        print("Omarchy not found: the bar widget is for Omarchy only", file=sys.stderr)
+        return 1
+    for src in (Path("/usr/share/aurguard/omarchy-plugin"), Path(__file__).resolve().parent.parent / "omarchy-plugin"):
+        if (src / "manifest.json").exists():
+            break
+    else:
+        print("widget files not found", file=sys.stderr)
+        return 1
+    dest = Path.home() / ".config/omarchy/plugins/io.github.ahmadrun.aurguard"
+    shutil.rmtree(dest, ignore_errors=True)
+    shutil.copytree(src, dest, ignore=shutil.ignore_patterns("install.sh"))
+    subprocess.run(["omarchy", "bar", "put", "io.github.ahmadrun.aurguard"], capture_output=True)
+    print("AUR Guard widget added. If it does not appear: omarchy restart shell")
+    return 0
+
+
 def cmd_disable(args, cfg) -> int:
     return subprocess.run(["systemctl", "--user", "disable", "--now",
                            "aurguard-update.timer", "aurguard-scan.timer"]).returncode
@@ -176,10 +195,11 @@ def main(argv=None) -> int:
     st.add_argument("--json", action="store_true")
     sub.add_parser("enable", help="enable automatic update+scan timers")
     sub.add_parser("disable", help="disable timers")
+    sub.add_parser("widget", help="add the Omarchy bar widget")
     args = ap.parse_args(argv)
     cfg = load_config()
     return {"scan": cmd_scan, "update": cmd_update, "status": cmd_status,
-            "enable": cmd_enable, "disable": cmd_disable}[args.cmd](args, cfg)
+            "enable": cmd_enable, "disable": cmd_disable, "widget": cmd_widget}[args.cmd](args, cfg)
 
 
 if __name__ == "__main__":

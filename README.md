@@ -14,7 +14,14 @@ Unlike one-time check scripts, aurguard **keeps itself current**:
 | Scheduled scans | systemd user timers: DB update every 6h, full scan daily, desktop notification on danger. |
 
 ## Install
-On Arch Linux, Omarchy included. No sudo needed:
+**From the AUR (recommended).** Updates come with your normal `yay -Syu`:
+```sh
+yay -S aurguard
+aurguard enable     # automatic protection: lists update every 6h, daily scan
+aurguard widget     # Omarchy only: add the shield to your bar
+```
+
+**Or from source.** No sudo needed:
 
 ```sh
 git clone https://github.com/AhmadRun/aurguard

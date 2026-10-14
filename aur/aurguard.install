@@ -1,0 +1,13 @@
+post_install() {
+  cat <<'MSG'
+==> aurguard installed. Turn on automatic protection (per user, no sudo):
+      aurguard enable        # update threat lists every 6h + daily scan
+      aurguard scan          # scan now
+    Omarchy users can add the bar shield with:
+      aurguard widget
+MSG
+}
+
+post_upgrade() {
+  echo "==> aurguard upgraded. Threat lists refresh on the next timer run (or: aurguard update)."
+}

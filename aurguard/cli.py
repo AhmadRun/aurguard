@@ -8,24 +8,36 @@ import time
 from dataclasses import asdict
 from pathlib import Path
 
-from . import __version__, db, inventory, notify, report, scanner
+from . import __version__, db, inventory, notify, report, scanner, upstream
 from .paths import STATE_DIR, load_config
 
 HISTORY = STATE_DIR / "history.jsonl"
 
 
 def cmd_update(args, cfg) -> int:
+    ok = False
+    try:
+        data = upstream.fetch(cfg["timeout"])
+        upstream.save(data)
+        total = sum(len(c["packages"]) for c in data["campaigns"])
+        print(f"community lists: {total} known-bad packages from {len(data['campaigns'])} campaigns")
+        ok = True
+    except Exception as e:
+        print(f"community lists: update failed ({e}); keeping previous copy", file=sys.stderr)
+
+    if "CHANGE-ME" in cfg["feed_url"]:
+        print("aurguard feed: not published yet (rules + extra threats use the built-in copy)")
+        return 0 if ok else 2
     try:
         changed, manifest = db.update(cfg["feed_url"], cfg["timeout"])
+        print(f"aurguard feed: {'updated to' if changed else 'already at'} v{manifest.get('version')}")
+        if db.version_tuple(manifest.get("min_client_version", "0")) > db.version_tuple(__version__):
+            print(f"warning: aurguard {__version__} is older than required "
+                  f"{manifest['min_client_version']}. Please upgrade.", file=sys.stderr)
+        ok = True
     except db.UpdateError as e:
-        print(f"update failed: {e}", file=sys.stderr)
-        return 2
-    print(f"threat DB {'updated to' if changed else 'already at'} v{manifest.get('version')} "
-          f"({manifest.get('updated', '?')})")
-    if db.version_tuple(manifest.get("min_client_version", "0")) > db.version_tuple(__version__):
-        print(f"warning: aurguard {__version__} is older than required "
-              f"{manifest['min_client_version']}. Please upgrade.", file=sys.stderr)
-    return 0
+        print(f"aurguard feed: update failed ({e})", file=sys.stderr)
+    return 0 if ok else 2
 
 
 def cmd_scan(args, cfg) -> int:
@@ -37,7 +49,8 @@ def cmd_scan(args, cfg) -> int:
     threats, ruleset = db.load_threats(), db.load_rules()
     log = (lambda m: print(m, file=sys.stderr)) if not args.json and not args.quiet else (lambda m: None)
     findings, warnings = scanner.scan(pkgs, threats, ruleset, online=not args.offline,
-                                      timeout=cfg["timeout"], log=log)
+                                      timeout=cfg["timeout"], log=log, upstream=upstream.load(),
+                                      installed_at=inventory.install_dates())
     dbv = db.local_manifest().get("version")
     (report.print_json if args.json else report.print_text)(findings, len(pkgs), dbv, warnings)
 
@@ -73,17 +86,26 @@ def _last_scan() -> dict | None:
     return json.loads(lines[-1]) if lines else None
 
 
+def _community() -> dict:
+    u = upstream.load()
+    return {"packages": sum(len(c["packages"]) for c in u.get("campaigns", [])),
+            "campaigns": len(u.get("campaigns", [])), "fetched": u.get("fetched")}
+
+
 def cmd_status(args, cfg) -> int:
     m = db.local_manifest()
     if args.json:
         print(json.dumps({"version": __version__, "feed": cfg["feed_url"], "db_version": m.get("version"),
                           "db_updated": m.get("updated"), "known": len(db.load_threats().get("packages", [])),
                           "rules": len(db.load_rules().get("rules", [])), "last_scan": _last_scan(),
+                          "community": _community(),
                           "timers": _timers()}))
         return 0
     print(f"aurguard {__version__}\nfeed: {cfg['feed_url']}\nthreat DB: v{m.get('version')} "
           f"updated {m.get('updated', '?')}, {len(db.load_threats().get('packages', []))} known-bad packages, "
           f"{len(db.load_rules().get('rules', []))} rules")
+    c = _community()
+    print(f"community lists: {c['packages']} known-bad packages, {c['campaigns']} campaigns, fetched {c['fetched']}")
     last = _last_scan()
     if last:
         n = len(last["findings"])

@@ -178,7 +178,7 @@ Panel {
             ? root.status.last_scan.scanned + " AUR pkgs · scanned " + root.ago(root.status.last_scan.time)
             : "Not scanned yet"
           detail: root.status
-            ? "DB v" + root.status.db_version
+            ? (root.status.community ? root.status.community.packages + " threats" : "DB v" + root.status.db_version)
             : ""
         }
 

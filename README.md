@@ -6,6 +6,7 @@ Unlike one-time check scripts, aurguard **keeps itself current**:
 
 | Layer | How it stays up to date |
 |---|---|
+| Community lists (no setup needed) | Every `aurguard update` pulls the live lists from [lenucksi/aur-malware-check](https://github.com/lenucksi/aur-malware-check) and the official Arch HedgeDoc: about 2,000 packages from the June 2026 attack, CHAOS RAT and Russian spam, plus attacker accounts and malware-file hashes. |
 | Known-malware blocklist | `feed/threats.json`. Every user downloads it automatically every 6h, sha256-verified. |
 | Behaviour rules (catch *unknown* malware) | `feed/rules.json`, delivered through the same auto-update. |
 | Feed maintenance | A daily GitHub Action (`tools/watch_aur.py`) scans every AUR package changed in the last 24h and opens a PR with suspects. |
@@ -38,6 +39,8 @@ timeout = 15
 3. Commit and push. Every user gets it within about 6 hours.
 
 ## Checks performed
+- Community campaign lists, checked against the **install date**. A package installed or updated after the attack started is *critical*. One installed before the attack is *medium*: don't update it until you've checked it.
+- Known malware files on disk, such as the fake `~/.local/bin/sudo` password grabber
 - Known malicious package names, versions and maintainer accounts
 - PKGBUILD and `.install` heuristics: pipe-to-shell, base64 exec, reverse shells, paste-site, Discord CDN and raw-IP downloads, shell-rc or autostart persistence, SSH key or browser credential access, and more
 - AUR metadata: package deleted from the AUR, orphaned, or brand new with no votes

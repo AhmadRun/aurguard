@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from aurguard import db, rules, scanner
+from aurguard import db, rules, scanner, upstream
 from aurguard.inventory import Package, parse
 
 FIX = Path(__file__).parent / "fixtures"
@@ -43,6 +43,29 @@ class BlocklistTests(unittest.TestCase):
         f = scanner.check_metadata([Package("x", "1")], {"x": {"Maintainer": "evil", "FirstSubmitted": 0}},
                                    set(), {"evil"})
         self.assertEqual(f[0].severity, "critical")
+
+
+class CampaignTests(unittest.TestCase):
+    UP = {"campaigns": [{"id": "x", "display": "June 2026", "window": {"start": "2026-06-09", "end": "2026-06-14"},
+                         "packages": ["hijacked-git"], "accounts": [], "iocs": []}]}
+
+    def test_installed_during_attack_is_critical(self):
+        f = scanner.check_campaigns([Package("hijacked-git", "1")], self.UP, {"hijacked-git": 1781200000}, set())
+        self.assertEqual(f[0].severity, "critical")
+
+    def test_installed_before_attack_is_medium(self):
+        f = scanner.check_campaigns([Package("hijacked-git", "1")], self.UP, {"hijacked-git": 1700000000}, set())
+        self.assertEqual(f[0].severity, "medium")
+
+    def test_parse_list(self):
+        self.assertEqual(upstream.parse_list("```\n# c\nfoo-bin\n\nbar # note\nnot a pkg\n```"), ["foo-bin", "bar"])
+
+    def test_fetch(self):
+        files = {"I/data/campaigns.json": json.dumps({"campaigns": [{"id": "a", "type": "aur", "lists": ["l.txt"],
+                                                                      "sources": {}}]}),
+                 "I/l.txt": "evil-bin\n"}
+        d = upstream.fetch(get=lambda url, t: files[url], base="I/")
+        self.assertEqual(d["campaigns"][0]["packages"], ["evil-bin"])
 
 
 class InventoryTests(unittest.TestCase):

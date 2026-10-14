@@ -50,6 +50,59 @@ def check_blocklist(pkgs: list[Package], threats: dict) -> list[Finding]:
     return out
 
 
+def _day(s: str) -> float:
+    import datetime
+    return datetime.datetime.fromisoformat(s).replace(tzinfo=datetime.UTC).timestamp()
+
+
+def check_campaigns(pkgs: list[Package], upstream: dict, installed_at: dict[str, int],
+                    skip: set[str]) -> list[Finding]:
+    """Community campaign lists. A name match is only *critical* if the package was installed or
+    upgraded on/after the campaign started (packages were hijacked temporarily, then cleaned)."""
+    out = []
+    for c in upstream.get("campaigns", []):
+        names = set(c.get("packages", []))
+        win = c.get("window")
+        for p in pkgs:
+            if p.name in skip or p.name not in names:
+                continue
+            when = installed_at.get(p.name)
+            ref = f"campaign: {c['display']}"
+            if not win or when is None:
+                out.append(Finding(p.name, p.version, "critical", f"KNOWN MALWARE ({c['display']})", [ref]))
+            elif when >= _day(win["start"]):
+                out.append(Finding(p.name, p.version, "critical",
+                                   f"Installed/updated after {c['display']} began — likely infected",
+                                   [ref, f"installed {time.strftime('%Y-%m-%d', time.localtime(when))}, "
+                                         f"attack window {win['start']} → {win['end']}"]))
+            else:
+                out.append(Finding(p.name, p.version, "medium",
+                                   f"Package was hijacked in {c['display']}, but your copy predates it",
+                                   [ref, f"installed {time.strftime('%Y-%m-%d', time.localtime(when))}. "
+                                         "Do NOT update it until you verify the current PKGBUILD."]))
+            skip = skip | {p.name}
+    return out
+
+
+def check_iocs(upstream: dict) -> list[Finding]:
+    """Look for known malware files on disk (e.g. the fake ~/.local/bin/sudo password grabber)."""
+    import os
+    out = []
+    for c in upstream.get("campaigns", []):
+        for ioc in c.get("iocs", []):
+            path = os.path.expanduser(ioc.get("path", ""))
+            if not path or not os.path.isfile(path):
+                continue
+            try:
+                digest = hashlib.sha256(open(path, "rb").read()).hexdigest()
+            except OSError:
+                continue
+            if digest == ioc.get("sha256"):
+                out.append(Finding(path, "-", "critical", f"MALWARE FILE FOUND: {ioc.get('description', '')}",
+                                   [f"campaign: {c['display']}", "Delete it and treat the system as compromised."]))
+    return out
+
+
 def check_metadata(pkgs: list[Package], meta: dict[str, dict], blocked: set[str],
                    bad_maintainers: set[str] = frozenset()) -> list[Finding]:
     out = []
@@ -104,16 +157,23 @@ def check_pkgbuilds(pkgs: list[Package], meta: dict[str, dict], ruleset: dict, t
 
 
 def scan(pkgs: list[Package], threats: dict, ruleset: dict, online: bool = True, timeout: int = 15,
-         log=lambda msg: None) -> tuple[list[Finding], list[str]]:
+         log=lambda msg: None, upstream: dict | None = None,
+         installed_at: dict[str, int] | None = None) -> tuple[list[Finding], list[str]]:
     """Returns (findings, warnings)."""
     warnings = []
+    upstream = upstream or {}
     findings = check_blocklist(pkgs, threats)
+    findings += check_campaigns(pkgs, upstream, installed_at or {}, {f.package for f in findings})
+    findings += check_iocs(upstream)
     blocked = {f.package for f in findings}
+    bad_accounts = set(threats.get("maintainers", []))
+    for c in upstream.get("campaigns", []):
+        bad_accounts.update(c.get("accounts", []))
     if online and pkgs:
         try:
             log("Querying AUR metadata...")
             meta = aur.info([p.name for p in pkgs], timeout)
-            findings += check_metadata(pkgs, meta, blocked, set(threats.get("maintainers", [])))
+            findings += check_metadata(pkgs, meta, blocked, bad_accounts)
             log("Analysing PKGBUILDs...")
             findings += check_pkgbuilds([p for p in pkgs if p.name not in blocked], meta, ruleset, timeout)
         except Exception as e:

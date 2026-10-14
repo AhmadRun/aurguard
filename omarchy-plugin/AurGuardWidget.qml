@@ -53,6 +53,12 @@ Panel {
     return ["sh", "-c", "PATH=\"$HOME/.local/bin:$PATH\"; exec \"$0\" \"$@\"", cmd].concat(args)
   }
 
+  function isoAgo(iso) {
+    if (!iso) return "never"
+    var t = Date.parse(iso)
+    return isNaN(t) ? "?" : ago(t / 1000)
+  }
+
   function refresh() {
     if (!statusProc.running) statusProc.running = true
   }
@@ -190,6 +196,52 @@ Panel {
           color: Color.urgent
           font.family: panel.fontName
           font.pixelSize: Style.font.bodySmall
+        }
+
+        // ---- Sources
+        Column {
+          width: parent.width
+          spacing: Style.space(4)
+          visible: root.status !== null
+
+          PanelSectionHeader {
+            text: "SOURCES"
+            foreground: panel.fg
+            fontFamily: panel.fontName
+          }
+
+          Repeater {
+            model: root.status ? [
+              ["Arch mailing lists (live)", root.status.arch_lists
+                ? root.status.arch_lists.reports + " reports · checked " + root.isoAgo(root.status.arch_lists.checked) : "—"],
+              ["Community lists", root.status.community
+                ? root.status.community.packages + " packages · " + root.isoAgo(root.status.community.fetched) : "—"],
+              ["Behaviour rules", root.status.rules + " rules on live PKGBUILDs"]
+            ] : []
+            delegate: Row {
+              required property var modelData
+              width: parent.width
+              spacing: Style.space(8)
+              Text {
+                width: parent.width * 0.48
+                text: modelData[0]
+                elide: Text.ElideRight
+                color: panel.fg
+                font.family: panel.fontName
+                font.pixelSize: Style.font.bodySmall
+              }
+              Text {
+                width: parent.width * 0.5
+                text: modelData[1]
+                elide: Text.ElideRight
+                horizontalAlignment: Text.AlignRight
+                color: panel.fg
+                opacity: 0.65
+                font.family: panel.fontName
+                font.pixelSize: Style.font.bodySmall
+              }
+            }
+          }
         }
 
         // ---- Findings

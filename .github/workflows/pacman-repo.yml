@@ -28,9 +28,8 @@ jobs:
       - name: Install tools
         run: pacman -Syu --noconfirm --needed base-devel pacman-contrib git github-cli python
 
+      # packaging recipe from main; the source itself comes from the tag tarball
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ env.TAG }}
 
       - name: Build package
         run: |

@@ -14,12 +14,23 @@ Unlike one-time check scripts, aurguard **keeps itself current**:
 | Scheduled scans | systemd user timers: DB update every 6h, full scan daily, desktop notification on danger. |
 
 ## Install
-**From the AUR (recommended).** Updates come with your normal `yay -Syu`:
+### With pacman (recommended): updates come with `sudo pacman -Syu`
+Run this once. It trusts the aurguard signing key and adds the repository:
 ```sh
-yay -S aurguard
-aurguard enable     # automatic protection: lists update every 6h, daily scan
+curl -fsSL https://raw.githubusercontent.com/AhmadRun/aurguard/main/aurguard-signing.asc | sudo pacman-key --add -
+sudo pacman-key --lsign-key B3FAACFC12BC59A4AD81EDCD3748D960BF3FBA87
+printf '\n[aurguard]\nServer = https://github.com/AhmadRun/aurguard/releases/latest/download\n' | sudo tee -a /etc/pacman.conf
+sudo pacman -Syu aurguard
+```
+Then turn on protection for your user:
+```sh
+aurguard enable     # lists update every 6h + daily scan
 aurguard widget     # Omarchy only: add the shield to your bar
 ```
+From now on `sudo pacman -Syu` keeps aurguard up to date. Every package and the repository database are GPG-signed, and pacman checks them.
+
+### From the AUR
+`yay -S aurguard`, once it's published there. AUR registration is currently closed.
 
 **Or from source.** No sudo needed:
 
@@ -48,6 +59,12 @@ Config (optional): `~/.config/aurguard/config.toml`
 feed_url = "https://raw.githubusercontent.com/you/aurguard/main/feed"
 timeout = 15
 ```
+
+## Releasing a new version (maintainers)
+1. Bump the version in `aurguard/__init__.py`, `pyproject.toml` and `aur/PKGBUILD`, then commit and push.
+2. Run `gh release create vX.Y.Z --notes "..."`.
+
+The **Build signed pacman repo** workflow then builds, signs and attaches the repo to the release, and every user gets it on their next `sudo pacman -Syu`.
 
 ## Adding new malware (maintainers)
 1. Add the package to `feed/threats.json` (name, severity, description, date, reference; optional `versions`). Bad AUR accounts go in `maintainers`.

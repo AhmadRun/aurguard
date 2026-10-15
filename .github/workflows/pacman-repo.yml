@@ -1,0 +1,62 @@
+name: Build signed pacman repo
+
+# On every GitHub release: build the package, sign it, and attach a pacman
+# repository (aurguard.db + package + signatures) to the release.
+# Users: Server = https://github.com/AhmadRun/aurguard/releases/latest/download
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to (re)build, e.g. v0.1.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  repo:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+      KEY_FPR: B3FAACFC12BC59A4AD81EDCD3748D960BF3FBA87
+    steps:
+      - name: Install tools
+        run: pacman -Syu --noconfirm --needed base-devel pacman-contrib git github-cli python
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: Build package
+        run: |
+          useradd -m builder
+          cp -r aur /home/builder/pkg && chown -R builder /home/builder/pkg
+          cd /home/builder/pkg
+          sed -i "s/^pkgver=.*/pkgver=${TAG#v}/" PKGBUILD
+          su builder -c "updpkgsums && makepkg -f --noconfirm"
+
+      - name: Sign package and create repo database
+        env:
+          SIGNING_KEY: ${{ secrets.PACKAGE_SIGNING_KEY }}
+        run: |
+          export GNUPGHOME=$(mktemp -d)
+          echo "$SIGNING_KEY" | gpg --batch --import
+          mkdir out && cp /home/builder/pkg/*.pkg.tar.zst out/ && cd out
+          for p in *.pkg.tar.zst; do gpg --batch --yes --detach-sign --no-armor -u "$KEY_FPR" "$p"; done
+          repo-add --sign --key "$KEY_FPR" aurguard.db.tar.gz *.pkg.tar.zst
+          # GitHub release assets can't be symlinks: ship real copies
+          for f in db files; do
+            cp --remove-destination "aurguard.$f.tar.gz" "aurguard.$f"
+            cp --remove-destination "aurguard.$f.tar.gz.sig" "aurguard.$f.sig"
+          done
+          ls -la
+
+      - name: Upload to release
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          gh release upload "$TAG" out/* --clobber -R "$GITHUB_REPOSITORY"

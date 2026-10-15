@@ -4,7 +4,8 @@
    "id": "PIPE-TO-SHELL",
    "severity": "high",
    "description": "Downloads and executes a remote script",
-   "pattern": "(curl|wget)\\b[^|#]*\\|\\s*(sudo\\s+)?(ba|z|da)?sh\\b"
+   "pattern": "(curl|wget)\\b[^|#]*\\|\\s*(sudo\\s+)?(ba|z|da)?sh\\b",
+   "exclude": "^\\s*(echo|printf|msg2?|warning|note)\\b"
   },
   {
    "id": "B64-EXEC",
@@ -34,7 +35,8 @@
    "id": "RAW-IP-URL",
    "severity": "high",
    "description": "Downloads from a raw IP address instead of a domain",
-   "pattern": "https?://\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(:\\d+)?/"
+   "pattern": "https?://\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(:\\d+)?/",
+   "exclude": "https?://(127\\.|0\\.0\\.0\\.0|10\\.|192\\.168\\.|172\\.(1[6-9]|2\\d|3[01])\\.)"
   },
   {
    "id": "REVERSE-SHELL",

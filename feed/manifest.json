@@ -1,9 +1,9 @@
 {
-  "version": 3,
-  "updated": "2026-10-14T22:59:04Z",
+  "version": 4,
+  "updated": "2026-10-15T00:21:37Z",
   "sha256": {
     "threats.json": "9866a537afbccfe49df5676a0f1aac6551bc2923a6508849eee8451b2b65f19e",
-    "rules.json": "d6829e47957600f4c276dcf4214ffc727ac1f41ccf67484d54dd4c8070f7c60a"
+    "rules.json": "d7885d6ccbd7ba428862aa093c005a6c3eb7729e39a407b77a4d12490a9a8ac8"
   },
   "min_client_version": "0.1.0"
 }

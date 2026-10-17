@@ -1,3 +1,24 @@
 {
-  "candidates": []
+  "candidates": [
+    {
+      "name": "paseo",
+      "version": "0.11.4-1",
+      "maintainer": "jinzhongjia",
+      "url": "https://aur.archlinux.org/packages/paseo",
+      "found": "2026-10-17",
+      "reasons": [
+        "[AUTOSTART] paseo.install:10: Create ~/.config/autostart/paseo-daemon.desktop with:"
+      ]
+    },
+    {
+      "name": "paseo-bin",
+      "version": "0.11.4-1",
+      "maintainer": "jinzhongjia",
+      "url": "https://aur.archlinux.org/packages/paseo-bin",
+      "found": "2026-10-17",
+      "reasons": [
+        "[AUTOSTART] paseo-bin.install:10: Create ~/.config/autostart/paseo-daemon.desktop with:"
+      ]
+    }
+  ]
 }

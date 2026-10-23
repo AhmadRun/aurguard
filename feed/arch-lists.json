@@ -1,4 +1,12 @@
 {
- "reports": [],
- "checked": "2026-10-14T23:53:10Z"
+ "reports": [
+  {
+   "package": "cudnn9.10-cuda12.9",
+   "list": "aur-requests",
+   "title": "[PRQ#88615] Deletion Request for cudnn9.10-cuda12.9",
+   "link": "https://lists.archlinux.org/archives/list/aur-requests@lists.archlinux.org/message/22Z6BFHTNHCAWDIOEEDZ3THLL2JULH4Z/",
+   "date": "2026-10-23"
+  }
+ ],
+ "checked": "2026-10-23T11:30:28Z"
 }

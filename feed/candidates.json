@@ -1,3 +1,34 @@
 {
-  "candidates": []
+  "candidates": [
+    {
+      "name": "botropolis",
+      "version": "0.3.0-1",
+      "maintainer": "auroq",
+      "url": "https://aur.archlinux.org/packages/botropolis",
+      "found": "2026-10-24",
+      "reasons": [
+        "[SHELL-RC-WRITE] botropolis.install:8: echo 'source /usr/share/botropolis/botropolis.bash' >> ~/.bashrc"
+      ]
+    },
+    {
+      "name": "foundry-cli-bin",
+      "version": "0.0.70-1",
+      "maintainer": "shpitdev",
+      "url": "https://aur.archlinux.org/packages/foundry-cli-bin",
+      "found": "2026-10-24",
+      "reasons": [
+        "[SHELL-RC-WRITE] foundry-cli-bin.install:5: printf '\\nsource <(foundry-cli completion --code zsh)\\n' >> ~/.zshrc"
+      ]
+    },
+    {
+      "name": "keycli",
+      "version": "0.1.4-1",
+      "maintainer": "Headorteil",
+      "url": "https://aur.archlinux.org/packages/keycli",
+      "found": "2026-10-24",
+      "reasons": [
+        "[SHELL-RC-WRITE] keycli.install:3: echo \"==> keycli alias bash >> ~/.bashrc # bash\""
+      ]
+    }
+  ]
 }

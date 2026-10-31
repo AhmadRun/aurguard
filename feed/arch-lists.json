@@ -6,7 +6,21 @@
    "title": "[PRQ#88615] Deletion Request for cudnn9.10-cuda12.9",
    "link": "https://lists.archlinux.org/archives/list/aur-requests@lists.archlinux.org/message/22Z6BFHTNHCAWDIOEEDZ3THLL2JULH4Z/",
    "date": "2026-10-23"
+  },
+  {
+   "package": "popcorntime",
+   "list": "aur-requests",
+   "title": "[PRQ#88942] Deletion Request for popcorntime Accepted",
+   "link": "https://lists.archlinux.org/archives/list/aur-requests@lists.archlinux.org/message/LYXX54UYJ4BVXZCY2CM264BRIEAJICWO/",
+   "date": "2026-10-31"
+  },
+  {
+   "package": "popcorntime-git",
+   "list": "aur-requests",
+   "title": "[PRQ#88941] Deletion Request for popcorntime-git Accepted",
+   "link": "https://lists.archlinux.org/archives/list/aur-requests@lists.archlinux.org/message/UMFPH72MHU3QMMO6L7CYPW5OAQFBLFUU/",
+   "date": "2026-10-31"
   }
  ],
- "checked": "2026-10-23T11:30:28Z"
+ "checked": "2026-10-31T21:25:55Z"
 }

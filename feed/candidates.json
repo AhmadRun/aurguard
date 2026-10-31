@@ -1,3 +1,54 @@
 {
-  "candidates": []
+  "candidates": [
+    {
+      "name": "chromium-extension-ublock-origin",
+      "version": "1.75.0-1",
+      "maintainer": "JerryXiao",
+      "url": "https://aur.archlinux.org/packages/chromium-extension-ublock-origin",
+      "found": "2026-10-31",
+      "reasons": [
+        "[B64-EXEC] PKGBUILD:20: export _id=\"$(echo $pubkey |base64 -d |sha256sum |head -c32 |tr '0-9a-f' 'a-p')\""
+      ]
+    },
+    {
+      "name": "chromium-extension-ublock-origin-lite",
+      "version": "2026.1026.1812-1",
+      "maintainer": "JerryXiao",
+      "url": "https://aur.archlinux.org/packages/chromium-extension-ublock-origin-lite",
+      "found": "2026-10-31",
+      "reasons": [
+        "[B64-EXEC] PKGBUILD:23: export _id=\"$(echo $pubkey |base64 -d |sha256sum |head -c32 |tr '0-9a-f' 'a-p')\""
+      ]
+    },
+    {
+      "name": "mavernix",
+      "version": "0.5.4-1",
+      "maintainer": "pruefsumme",
+      "url": "https://aur.archlinux.org/packages/mavernix",
+      "found": "2026-10-31",
+      "reasons": [
+        "[AUTOSTART] PKGBUILD:36: 'dex: starting the programs in ~/.config/autostart'"
+      ]
+    },
+    {
+      "name": "superhuman",
+      "version": "1044.0.1-1",
+      "maintainer": "joeyeamigh",
+      "url": "https://aur.archlinux.org/packages/superhuman",
+      "found": "2026-10-31",
+      "reasons": [
+        "[AUTOSTART] superhuman.install:11: cp /etc/xdg/autostart/superhuman.desktop ~/.config/autostart/"
+      ]
+    },
+    {
+      "name": "vellum",
+      "version": "1.1.0-1",
+      "maintainer": "CPT_Dawn",
+      "url": "https://aur.archlinux.org/packages/vellum",
+      "found": "2026-10-31",
+      "reasons": [
+        "[AUTOSTART] vellum.install:12: ~/.config/autostart/"
+      ]
+    }
+  ]
 }

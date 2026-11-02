@@ -34,7 +34,21 @@
    "title": "Request for Maintainer Transfer: forskscope-bin",
    "link": "https://lists.archlinux.org/archives/list/aur-general@lists.archlinux.org/message/2YR4NP4PBO7IPKS7UETD6N6HFKHQ256Q/",
    "date": "2026-11-02"
+  },
+  {
+   "package": "forskscope",
+   "list": "aur-general",
+   "title": "Re: Request for Maintainer Transfer: forskscope-bin",
+   "link": "https://lists.archlinux.org/archives/list/aur-general@lists.archlinux.org/message/3ONIU3T2BWQ7KK7D6UGAX6DRVC7MOPHU/",
+   "date": "2026-11-02"
+  },
+  {
+   "package": "forskscope-bin",
+   "list": "aur-general",
+   "title": "Re: Request for Maintainer Transfer: forskscope-bin",
+   "link": "https://lists.archlinux.org/archives/list/aur-general@lists.archlinux.org/message/3ONIU3T2BWQ7KK7D6UGAX6DRVC7MOPHU/",
+   "date": "2026-11-02"
   }
  ],
- "checked": "2026-11-02T05:51:37Z"
+ "checked": "2026-11-02T15:36:48Z"
 }

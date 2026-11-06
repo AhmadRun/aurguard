@@ -48,7 +48,14 @@
    "title": "Re: Request for Maintainer Transfer: forskscope-bin",
    "link": "https://lists.archlinux.org/archives/list/aur-general@lists.archlinux.org/message/3ONIU3T2BWQ7KK7D6UGAX6DRVC7MOPHU/",
    "date": "2026-11-02"
+  },
+  {
+   "package": "stirling-pdf-desktop-bin",
+   "list": "aur-requests",
+   "title": "[PRQ#89133] Deletion Request for stirling-pdf-desktop-bin",
+   "link": "https://lists.archlinux.org/archives/list/aur-requests@lists.archlinux.org/message/UUN4OLVRE36263PLTX5C55TYVPHJAZ6P/",
+   "date": "2026-11-06"
   }
  ],
- "checked": "2026-11-02T15:36:48Z"
+ "checked": "2026-11-06T19:16:42Z"
 }

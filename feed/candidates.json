@@ -1,3 +1,14 @@
 {
-  "candidates": []
+  "candidates": [
+    {
+      "name": "superhuman",
+      "version": "1044.0.6-1",
+      "maintainer": "joeyeamigh",
+      "url": "https://aur.archlinux.org/packages/superhuman",
+      "found": "2026-11-14",
+      "reasons": [
+        "[AUTOSTART] superhuman.install:11: cp /etc/xdg/autostart/superhuman.desktop ~/.config/autostart/"
+      ]
+    }
+  ]
 }

@@ -55,7 +55,14 @@
    "title": "[PRQ#89133] Deletion Request for stirling-pdf-desktop-bin",
    "link": "https://lists.archlinux.org/archives/list/aur-requests@lists.archlinux.org/message/UUN4OLVRE36263PLTX5C55TYVPHJAZ6P/",
    "date": "2026-11-06"
+  },
+  {
+   "package": "ollama-aie2",
+   "list": "aur-requests",
+   "title": "[PRQ#89430] Deletion Request for ollama-aie2",
+   "link": "https://lists.archlinux.org/archives/list/aur-requests@lists.archlinux.org/message/3OIPTNEDQB22I4S7D2NBA3M2N7YMLNEF/",
+   "date": "2026-11-17"
   }
  ],
- "checked": "2026-11-06T19:16:42Z"
+ "checked": "2026-11-17T20:47:46Z"
 }

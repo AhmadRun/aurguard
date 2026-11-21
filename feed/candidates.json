@@ -1,3 +1,14 @@
 {
-  "candidates": []
+  "candidates": [
+    {
+      "name": "adguard-tray",
+      "version": "2.4.0-1",
+      "maintainer": "RiDDiX",
+      "url": "https://aur.archlinux.org/packages/adguard-tray",
+      "found": "2026-11-21",
+      "reasons": [
+        "[PIPE-TO-SHELL] PKGBUILD:24: 'adguard-cli-bin: AdGuard CLI via AUR (alternatively install upstream: curl -fsSL https://raw.githubusercontent.com/AdguardTeam/AdGuardCLI/release/install.sh | sh -s -- -v)'"
+      ]
+    }
+  ]
 }
